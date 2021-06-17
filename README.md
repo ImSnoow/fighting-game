@@ -17,3 +17,25 @@ HINT:
 objects
 if setninger
 Math.random()
+
+
+/********************************/
+*              TODO             *
+/********************************/
+
+0. Planlegge hvordan siden skal se ut i f.eks paint, 
+0a. Finne bilder
+
+1. Tegne opp et View
+
+2. Lage en model
+
+3. Legge til funksjoner
+3a. Funksjon for healtpoints
+3b. Funksjon for å redusere HP "ved attack"
+3c. Funksjon for crit
+3d. Funksjon for å bomme
+
+3e. Funksjon for å ikke kunne angripe etter 0 HP
+3f. Funksjon for å ikke kunne gå under 0 HP
+3g. Funksjon for å alerte vinner på skjermen!

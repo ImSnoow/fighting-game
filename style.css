@@ -1,0 +1,39 @@
+body{
+    padding: 0;
+    margin-left: 10vh;
+    margin-right: 10vh;
+    margin-top: 4vh;
+
+}
+
+.grid-container{
+    background-color: lightgray;
+    display: grid;
+    height: 45vh;
+
+    grid-template-columns: auto auto auto;
+    grid-template-rows: 25vh 50vh 25vh;
+
+    justify-content: space-evenly;
+
+    padding: 5vh;
+}
+
+#BottomATK1{
+    width: 100px;
+    height: 50px;
+    margin: 25px;
+
+}
+
+#BottomATK2Crit{
+    width: 100px;
+    height: 50px;
+    margin: 25px;
+
+}
+
+.bottom{
+    background-color: green;
+}
+
