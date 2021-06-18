@@ -139,11 +139,7 @@ function combatRoll(obj, isSpecial)
     
     // Om vi ikke bommer:
     let rolledDam = Math.round(Math.random() * (damMax - damMin) + damMin);
-
-    if (rolledDam == damMin)
-        effectiveness = " - It's not very effective";
-    else if (rolledDam == damMax)
-        effectiveness = " - It's super effective!";
+    effectiveness = checkIfMinMax(rolledDam, damMin, damMax);
 
     // Sjekk om vi får et crit
     let critRoll = Math.random() * 100;   
@@ -160,6 +156,15 @@ function combatRoll(obj, isSpecial)
     return rolledDam;
 }
 
+function checkIfMinMax(rolledDam, damMin, damMax)
+{
+    if (rolledDam == damMin)
+        return " - It's not very effective";
+    else if (rolledDam == damMax)
+        return " - It's super effective!";
+    else return "";
+}
+
 function buildComboPoints()
 {
     player.combat.numberOfAttacks++;
@@ -170,11 +175,6 @@ function spendComboPoints()
 {
     player.combat.numberOfAttacks = 0;
     enableSpecialAttack(false);
-}
-
-function enableSpecialAttack(isEnabled)
-{
-    isEnabled == true ? specialButtonEnabled = "enabled" : specialButtonEnabled = "disabled";
 }
 
 /*---------------------------------*
@@ -191,6 +191,13 @@ function printCombatLog()
 
     return newLog;
 }
+
+function enableSpecialAttack(isEnabled)
+{
+    isEnabled == true ? specialButtonEnabled = "enabled" : specialButtonEnabled = "disabled";
+}
+
+
 /*---------------------------------*
  *            GAME STATES          *
  *---------------------------------*/
