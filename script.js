@@ -66,51 +66,43 @@ function GetComboPoints()
     return comboPoints;
 }
 
-function CapHealthAtZero()
+function capHealthAtZero()
 {
     computer.currentHealth = Math.max(0, computer.currentHealth);
     player.currentHealth = Math.max(0, player.currentHealth);
 }
 
 function basicAttack()
-{           
-    computer.currentHealth -= combatRoll(player, false);
+{       
     player.currentHealth -= combatRoll(computer, false);
-    CapHealthAtZero();
+    if (IsDead()) return;
 
-    player.combat.numberOfAttacks++;
-    computer.combat.numberOfAttacks++;
-
+    computer.currentHealth -= combatRoll(player, false);
+    if (IsDead()) return;
     
+    capHealthAtZero();
+
+    buildComboPoints();
+
     basicButtonText = "Basic Button ComboPoints: " + GetComboPoints();
 
     if (player.combat.numberOfAttacks >= player.combat.attacksNeededForSpecial)
         enableSpecialAttack(true);
-
-    if (computer.currentHealth <= 0 || player.currentHealth <= 0)
-    {
-        endGame();
-    }
 
     updateView();
 }
 
 function specialAttack()
 {
-    computer.currentHealth -= combatRoll(player, true);
     player.currentHealth -= combatRoll(computer, false);
-    CapHealthAtZero();
+    if (IsDead()) return;
 
+    computer.currentHealth -= combatRoll(player, true);
+    if (IsDead()) return;
 
-    player.combat.numberOfAttacks = 0;
-    enableSpecialAttack(false);
+    spendComboPoints();
 
     basicButtonText = "Basic Button";
-
-    if (computer.currentHealth <= 0 || player.currentHealth <= 0)
-    {
-        endGame();
-    }
 
     updateView();
 }
@@ -147,8 +139,6 @@ function combatRoll(obj, isSpecial)
     
     // Om vi ikke bommer:
     let rolledDam = Math.round(Math.random() * (damMax - damMin) + damMin);
-    
-    console.log(rolledDam);
 
     if (rolledDam == damMin)
         effectiveness = " - It's not very effective";
@@ -170,12 +160,26 @@ function combatRoll(obj, isSpecial)
     return rolledDam;
 }
 
-//Denne "disabler special attack knappen" 
+function buildComboPoints()
+{
+    player.combat.numberOfAttacks++;
+    computer.combat.numberOfAttacks++;
+}
+
+function spendComboPoints()
+{
+    player.combat.numberOfAttacks = 0;
+    enableSpecialAttack(false);
+}
+
 function enableSpecialAttack(isEnabled)
 {
     isEnabled == true ? specialButtonEnabled = "enabled" : specialButtonEnabled = "disabled";
 }
 
+/*---------------------------------*
+ *         User Interface          *
+ *---------------------------------*/
 
 function printCombatLog()
 {
@@ -191,7 +195,16 @@ function printCombatLog()
  *            GAME STATES          *
  *---------------------------------*/
 
-
+function IsDead()
+{
+    if (computer.currentHealth <= 0 || player.currentHealth <= 0)
+    {       
+        capHealthAtZero();
+        endGame();
+        return true;
+    }
+    return false;
+}
 
 function endGame()
 {

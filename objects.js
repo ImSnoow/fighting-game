@@ -14,8 +14,7 @@ const buttonstatus = {
 
 /*------PLAYER------*/
 player = {
-
-    bar: HP.high,
+    
     name: "Bulbasaur",
 
     sprite: "",    
@@ -34,14 +33,14 @@ player = {
         miss: 0,
     },
 
+    bar: HP.high,
     currentHealth: 100,
     maxHealth: 100,
 }
 
 /*------COMPUTER------*/
 computer = {
-    
-    bar: HP.high,
+        
     name: "Charmander",
 
     sprite: "",
@@ -60,6 +59,7 @@ computer = {
         miss: 10,
     },
 
+    bar: HP.high,
     currentHealth: 150,   
     maxHealth: 150,
 }
