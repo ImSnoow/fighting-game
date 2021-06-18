@@ -2,158 +2,241 @@
  *   REFERENCES   *
  *----------------*/
 viewDiv = document.getElementById("view");
+combatLog = document.getElementById("combatLog");
 
-/*----------------*
- *    OBJECTS     *
- *----------------*/
-
-player = {
-
-    name: "Player",
-    sprites: {
-        idle: "img/playerIdle.png",
-        attack: "img/playerAttack.png",
-    },
-
-    currentHealth: 100,
-    health: 100,
-
-    damMin: 5,
-    damMax: 10,
-
-    crit: 10,
-    critMultiplier: 100,
-    miss: 10,
-}
-computer = {
-    
-    name: "Computer",
-    sprites: {
-        idle: "img/npcIdle.png",
-        attack: "img/npcAttack.png",
-    },
-
-    currentHealth: 150,   
-    health: 150,
-
-    damMin: 6,
-    damMax: 12,
-
-    crit: 10,
-    critMultiplier: 100,
-    miss: 10,
-}
-
-const HP = {
-    high: "img/HPBar/HPBarHigh.png",
-    med: "img/HPBar/HPBarMed.png",
-    low: "img/HPBar/HPBarLow.png",
-}
-
-
-/*----------------*
- *     MODEL      *
- *----------------*/
+/****************************************************
+ *                     MODEL                        *
+ ****************************************************/
 const healthBarWidth = 300; // value in pixels
+var specialButtonEnabled = buttonstatus.disabled;
+var basicButtonEnabled = buttonstatus.enabled;
+var combatLog = [];
+var basicButtonText = "Basic Attack";
 
-var playerBar;
-var NPCBar;
 /*----------------*
  *     START      *
  *----------------*/
+player.sprite = player.sprites.idle;
+computer.sprite = computer.sprites.idle;
+
 updateView();
 
-/*----------------*
- *   CONTROLLER   *
- *----------------*/
-function getBarWidth(player, health, maxhealth)
+
+
+
+/****************************************************
+ *                  CONTROLLER                      *
+ ****************************************************/
+
+function getBarWidth(obj)
 {
-    let percent = health/maxhealth;
+    let percent = obj.currentHealth/obj.maxHealth;
     
-    if (player == 0)
-        UpdatePlayerBarColor(percent);
-    else
-        UpdateEnemyBarColor(percent);
+    UpdateHealthBar(obj, percent);
 
-    return Math.min((health/maxhealth) * healthBarWidth.toString(), healthBarWidth) + "px";
+    return Math.min((obj.currentHealth/obj.maxHealth) * healthBarWidth.toString(), healthBarWidth) + "px";
 }
 
-function UpdatePlayerBarColor(percent)
+function UpdateHealthBar(obj, percent)
 {
     if (percent > 0.66)
-        playerBar = HP.high;
+        obj.bar = HP.high;
     else if (percent <= 0.66 && percent >= 0.33)
-        playerBar = HP.med;
+        obj.bar = HP.med;
     else
-        playerBar = HP.low;
+        obj.bar = HP.low;
 }
 
-function UpdateEnemyBarColor(percent)
+
+/*---------------------------------*
+ *             COMBAT              *
+ *---------------------------------*/
+
+function GetComboPoints()
 {
-    if (percent > 0.66)
-        NPCBar = HP.high;
-    else if (percent <= 0.66 && percent >= 0.33)
-        NPCBar = HP.med;
-    else
-        NPCBar = HP.low;
+    let comboPoints = "(";
+
+    for (i = 0; i < Math.min(3, player.combat.numberOfAttacks); i++)
+    {
+        comboPoints += "*";
+    }
+
+    comboPoints += ")";
+
+    return comboPoints;
+}
+
+function CapHealthAtZero()
+{
+    computer.currentHealth = Math.max(0, computer.currentHealth);
+    player.currentHealth = Math.max(0, player.currentHealth);
 }
 
 function basicAttack()
-{
+{           
+    computer.currentHealth -= combatRoll(player, false);
+    player.currentHealth -= combatRoll(computer, false);
+    CapHealthAtZero();
+
+    player.combat.numberOfAttacks++;
+    computer.combat.numberOfAttacks++;
+
+    
+    basicButtonText = "Basic Button ComboPoints: " + GetComboPoints();
+
+    if (player.combat.numberOfAttacks >= player.combat.attacksNeededForSpecial)
+        enableSpecialAttack(true);
+
     if (computer.currentHealth <= 0 || player.currentHealth <= 0)
-        return;
-        
-    computer.currentHealth -= combatRoll(player);
-    player.currentHealth -= combatRoll(computer);
+    {
+        endGame();
+    }
 
     updateView();
 }
 
-function combatRoll(obj)
+function specialAttack()
 {
-    // Først sjekk om vi bommer:
-    let missRoll = Math.random() * 100;
-    if (missRoll < obj.miss)
+    computer.currentHealth -= combatRoll(player, true);
+    player.currentHealth -= combatRoll(computer, false);
+    CapHealthAtZero();
+
+
+    player.combat.numberOfAttacks = 0;
+    enableSpecialAttack(false);
+
+    basicButtonText = "Basic Button";
+
+    if (computer.currentHealth <= 0 || player.currentHealth <= 0)
     {
-        return 0;
+        endGame();
     }
 
+    updateView();
+}
+
+function combatRoll(obj, isSpecial)
+{
+    let isCrit = "";
+    let attackType = "(Basic)";
+    let effectiveness = "";
+
+    let damMin = obj.combat.damMin;
+    let damMax = obj.combat.damMax;
+    let miss = obj.combat.miss;
+    let crit = obj.combat.crit;
+    let multiplier = obj.combat.critMultiplier;
+
+    if (isSpecial)
+    {
+        attackType = "(Special)";
+        damMin *= 2;
+        damMax *= 2;
+        miss = 0;
+        crit = 100;
+    }
+
+    // Først sjekk om vi bommer:
+    let missRoll = Math.random() * 100;
+    if (missRoll < miss)
+    {
+        let newLogEntry = obj.name.toString() + " bommet";
+        combatLog.push(newLogEntry);
+        return 0;
+    }
+    
     // Om vi ikke bommer:
-    let damMin = obj.damMin;
-    let damMax = obj.damMax;
     let rolledDam = Math.round(Math.random() * (damMax - damMin) + damMin);
     
+    console.log(rolledDam);
+
+    if (rolledDam == damMin)
+        effectiveness = " - It's not very effective";
+    else if (rolledDam == damMax)
+        effectiveness = " - It's super effective!";
+
     // Sjekk om vi får et crit
     let critRoll = Math.random() * 100;   
-    if (critRoll < obj.crit)
-        rolledDam *= 1 + (obj.critMultiplier / 100);
+    if (critRoll < crit)
+    {
+        rolledDam *= 1 + (multiplier / 100);
+        isCrit = "(Crit)";
+    }
 
-    // Returner endelig skade
-    console.log(obj.name + " gjorde " + rolledDam + " skade");
+    // Returner endelig skade og oppdater log
+    let newLogEntry = obj.name.toString() + " gjorde " + rolledDam.toString() + " skade " + attackType + isCrit + effectiveness;
+    combatLog.push(newLogEntry);
+
     return rolledDam;
 }
 
-/*----------------*
- *      VIEW      *
- *----------------*/
+//Denne "disabler special attack knappen" 
+function enableSpecialAttack(isEnabled)
+{
+    isEnabled == true ? specialButtonEnabled = "enabled" : specialButtonEnabled = "disabled";
+}
+
+
+function printCombatLog()
+{
+    let newLog = "";
+    for (i = 0; i < combatLog.length; i++)
+    {
+        newLog += (i+1).toString() + ") " + combatLog[i] + "<br />";
+    }
+
+    return newLog;
+}
+/*---------------------------------*
+ *            GAME STATES          *
+ *---------------------------------*/
+
+
+
+function endGame()
+{
+    basicButtonEnabled = buttonstatus.disabled;
+    specialButtonEnabled = buttonstatus.disabled;
+
+    if (player.currentHealth <= 0 && computer.currentHealth > 0)
+    {
+        player.sprite = player.sprites.dead;
+        combatLog.push(computer.name.toString() + " vant!");
+        //alert("Computer Vinner!");
+    }
+        
+    else
+    {
+        computer.sprite = computer.sprites.dead;
+        combatLog.push(player.name.toString() + " vant!");
+        //alert("Spiller Vinner!");
+    }
+        
+
+    updateView();
+}
+
+/****************************************************
+ *                      VIEW                        *
+ ****************************************************/
 function updateView()
 {
     viewDiv.innerHTML = `
         <div class="grid-container">
-             <img id=playerHP width="${getBarWidth(0, player.currentHealth, player.health)}" height="64" src="${playerBar}" alt="playerHP" >  
-             <div id="Top2VS">VS</div>
-             <img id=npcHP width="${getBarWidth(1, computer.currentHealth, computer.health)}" height="64"src="${NPCBar}" alt="npcHP" >  
+             <div ><img id=playerHP width="${getBarWidth(player)}" height="64" src="${player.bar}" alt="playerHP" >${player.currentHealth}/${player.maxHealth}</div>
+             <div id="TopVS">Bulbasaur VS Charmander</div>
+             <div>${computer.currentHealth}/${computer.maxHealth}<img id=npcHP width="${getBarWidth(computer)}" height="64"src="${computer.bar}" alt="npcHP" ></div>  
                                 
-            <img id=playerImg src="img/bulbasaur.png" alt="playerImg" width="256" height="256">  
-            <div id="empty">tom</div>  
-            <img id=playerImg src="img/charmander.png" alt="playerImg" width="256" height="256">  
+            <img id=playerImg src=${player.sprite} alt="playerImg" width="256" height="256">  
+            <div id="combatLog">${printCombatLog()}</div>  
+            <img id=playerImg src=${computer.sprite} alt="playerImg" width="256" height="256">  
              
             <div id="attacks">
-                <button id="BottomATK1" onclick="basicAttack()">basic attack</button>  
-                <button id="BottomATK2Crit">special attack</button> 
+                <button ${basicButtonEnabled} id="BottomATK1" onclick="basicAttack()">${basicButtonText}</button>  
+                <button ${specialButtonEnabled} id="BottomATK2Crit" onclick="specialAttack()">Special Attack</button> 
             </div> 
-            <div id="Bottom empty">tom</div> 
-            <div id="Bottom empty">tom</div>      
+            <div id="Bottom empty"></div> 
+            <div id="Bottom empty"></div>      
         </div>
     `;
 }
