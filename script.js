@@ -73,14 +73,12 @@ function capHealthAtZero()
 }
 
 function basicAttack()
-{       
-    player.currentHealth -= combatRoll(computer, false);
-    if (IsDead()) return;
-
+{   
     computer.currentHealth -= combatRoll(player, false);
     if (IsDead()) return;
-    
-    capHealthAtZero();
+
+    player.currentHealth -= combatRoll(computer, false);
+    if (IsDead()) return;
 
     buildComboPoints();
 
@@ -94,10 +92,10 @@ function basicAttack()
 
 function specialAttack()
 {
-    player.currentHealth -= combatRoll(computer, false);
+    computer.currentHealth -= combatRoll(player, true);
     if (IsDead()) return;
 
-    computer.currentHealth -= combatRoll(player, true);
+    player.currentHealth -= combatRoll(computer, false);
     if (IsDead()) return;
 
     spendComboPoints();
@@ -194,7 +192,7 @@ function printCombatLog()
 
 function enableSpecialAttack(isEnabled)
 {
-    isEnabled == true ? specialButtonEnabled = "enabled" : specialButtonEnabled = "disabled";
+    isEnabled == true ? specialButtonEnabled = buttonstatus.enabled : specialButtonEnabled = buttonstatus.disabled;
 }
 
 
