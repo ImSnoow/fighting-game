@@ -82,7 +82,7 @@ function basicAttack()
 
     buildComboPoints();
 
-    basicButtonText = "Basic Button ComboPoints: " + GetComboPoints();
+    basicButtonText = "Basic Attack: " + GetComboPoints();
 
     if (player.combat.numberOfAttacks >= player.combat.attacksNeededForSpecial)
         enableSpecialAttack(true);
@@ -100,7 +100,7 @@ function specialAttack()
 
     spendComboPoints();
 
-    basicButtonText = "Basic Button";
+    basicButtonText = "Basic Attack";
 
     updateView();
 }
