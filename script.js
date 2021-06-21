@@ -218,17 +218,17 @@ function endGame()
 
     if (player.currentHealth <= 0 && computer.currentHealth > 0)
     {
-        player.sprite = player.sprites.dead;
-        combatLog.push(computer.name.toString() + " vant!");
         alert("Du tapte!");
+        player.sprite = player.sprites.dead;
+        combatLog.push(computer.name.toString() + " vant!");        
         //alert("Computer Vinner!");
     }
         
     else
     {
-        computer.sprite = computer.sprites.dead;
-        combatLog.push(player.name.toString() + " vant!");
         alert("Du vant!");
+        computer.sprite = computer.sprites.dead;
+        combatLog.push(player.name.toString() + " vant!");        
         //alert("Spiller Vinner!");
     }
         
