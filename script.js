@@ -217,18 +217,18 @@ function endGame()
     specialButtonEnabled = buttonstatus.disabled;
 
     if (player.currentHealth <= 0 && computer.currentHealth > 0)
-    {
-        alert("Du tapte!");
+    {        
         player.sprite = player.sprites.dead;
-        combatLog.push(computer.name.toString() + " vant!");        
+        combatLog.push(computer.name.toString() + " vant!");
+        alert("Du tapte!");
         //alert("Computer Vinner!");
     }
         
     else
-    {
-        alert("Du vant!");
+    {        
         computer.sprite = computer.sprites.dead;
-        combatLog.push(player.name.toString() + " vant!");        
+        combatLog.push(player.name.toString() + " vant!"); 
+        alert("Du vant!");
         //alert("Spiller Vinner!");
     }
         
