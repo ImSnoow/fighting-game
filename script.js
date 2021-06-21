@@ -220,6 +220,7 @@ function endGame()
     {
         player.sprite = player.sprites.dead;
         combatLog.push(computer.name.toString() + " vant!");
+        alert("Du tapte!");
         //alert("Computer Vinner!");
     }
         
@@ -227,6 +228,7 @@ function endGame()
     {
         computer.sprite = computer.sprites.dead;
         combatLog.push(player.name.toString() + " vant!");
+        alert("Du vant!");
         //alert("Spiller Vinner!");
     }
         
